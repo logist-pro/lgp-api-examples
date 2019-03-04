@@ -1,0 +1,14 @@
+{
+  "name": "lgp-api-nodejs",
+  "version": "1.0.0",
+  "description": "LGP API nodejs example",
+  "main": "ApiExample.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Anton Zhukov",
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^2.3.0"
+  }
+}
