@@ -62,6 +62,9 @@ typings/
 
 # editors
 .vscode
+.vs
 
 # others
 *-lock.*
+bin
+obj
