@@ -23,32 +23,36 @@ main();
 
 async function main() {
 
-  // тестирование доступа (запрос не требует авторизации, только ключ API в заголовках запроса)
+  // -----
+  // 1. тестирование доступа (запрос не требует авторизации, только ключ API в заголовках запроса)
+  // -----
   let url = API_BASE_URL+'test/ping';
-  console.log('Проверка доступа к API: ', url);
+  console.log('1. Проверка доступа к API: ', url);
   // GET запрос на сервер
   let response = await requestGet(url);
   if (!response) {
-    console.log('  >> API не доступен')
+    console.log('   >> API не доступен');
     // выход из примера
     return;
   }
-  console.log('  >> есть доступ')
+  console.log('   >> есть доступ');
   
 
-  // авторизация в системе заданным пользователем
+  // -----
+  // 2. авторизация в системе заданным пользователем
+  // -----
   url = API_BASE_URL+'account/login';
-  console.log('Авторизация: ', url);
+  console.log('2. Авторизация: ', url);
   // передача параметров в URL
   url = url+`?login=${LOGIN}&password=${PASSWORD}`;
   // POST запрос с пустым телом
   response = await requestPost(url);
   if (!response) return;
-  console.log('  >> прошла успешно');
+  console.log('   >> прошла успешно');
   // поиск Set-Cookie заголовка ответа
   const cookie = response.headers.get('Set-Cookie');
   if (!cookie) {
-    console.log('  >> [Error] cookie не установлена');
+    console.log('   >> [Error] cookie не установлена');
     return;
   }
   // значения первой возвращенной куки (.AspNet.ApplicationCookie)
@@ -56,25 +60,30 @@ async function main() {
   headers['Cookie'] = cookie.split(';')[0];
 
 
-  // перед созданием нового запроса, необходимо определить значения некоторых обязательных параметров
-  // (в частности, идентификаторов компании заказчика и ответственного за заказ лица)
-  // если эти параметры неизвестны, то можно запросить актуальные справочники с сервера
+  // -----
+  // 3. перед созданием нового запроса, необходимо определить значения некоторых обязательных параметров
+  //    (в частности, идентификаторов компании заказчика и ответственного за заказ лица)
+  //    если эти параметры неизвестны, то можно запросить актуальные справочники с сервера
+  // -----
   url = API_BASE_URL+'tender/create';
-  console.log('Получение справочников для создания запроса: ', url);
+  console.log('3. Получение справочников для создания запроса: ', url);
   response = await requestGet(url);
   if (!response) return;
   // разбор JSON ответа сервера
   const dicts = await response.json();
   // получение идентификаторов из первых элементов справочников
-  const coprorateId = dicts.Corporates[0].Id;
+  const corporateId = dicts.Corporates[0].Id;
   const contactId = dicts.Corporates[0].ContactPersons[0].Id;
-  if (!coprorateId || !contactId) {
-    console.log('  >> [Error] не найдены необходимые элементы справочника.');
+  if (!corporateId || !contactId) {
+    console.log('   >> [Error] не найдены необходимые элементы справочника');
     return;
   }
 
 
-  console.log('Создание запроса: ', url);
+  // -----
+  // 4. Создание запроса
+  // -----
+  console.log('4. Создание запроса: ', url);
   // время создания заказа
   const now = new Date();
   // дата исполнения заказа (текущая дата +7 дней, 08:00)
@@ -86,7 +95,7 @@ async function main() {
     // дата исполнения заказа
     "StartDate": start.toISOString(),
     "Customer": {
-      "CompanyId": coprorateId,
+      "CompanyId": corporateId,
       "ContactId": contactId
     },
     "Cargo": "Важный груз",
@@ -130,23 +139,28 @@ async function main() {
   if (!response) return;
   // получение идентификатора новосозданного запроса
   const tenderId = (await response.text()).replace(/"/g,'');
-  console.log('  >> Создан запрос Id=', tenderId);
+  if (!tenderId) {
+    console.log('   >> [Error] не получен идентификатор нового запроса');
+    return;
+  }
+  console.log('   >> Создан запрос Id=', tenderId);
   
   
-  // для проверки статуса нового запроса, запрашиваем полные данные по идентификатору
+  // -----
+  // 5. для проверки статуса нового запроса, запрашиваем полные данные по идентификатору
+  // -----
   url = API_BASE_URL+'tender/'+tenderId;
-  console.log('Проверка статуса запроса: ', url);
+  console.log('5. Проверка статуса запроса: ', url);
   response = await requestGet(url);
   if (!response) return;
   tender = await response.json();
-  console.log('  >> Номер: ', tender.Number);
-  console.log(`  >> Статус: ${tender.StatusTitle} (${tender.Status})`);
-  console.log(`  >> Время последнего изменения статуса: ${tender.ActualDate} (${tender.ActualDateTitle})`);
-  console.log('  >> Длина маршрута: ', tender.RouteLenght);
-  console.log('  >> Количество предложений: ', tender.ProposalsCount);
+  console.log('   >> Номер: ', tender.Number);
+  console.log(`   >> Статус: ${tender.StatusTitle} (${tender.Status})`);
+  console.log(`   >> Время последнего изменения статуса: ${tender.ActualDate} (${tender.ActualDateTitle})`);
+  console.log('   >> Длина маршрута: ', tender.RouteLenght);
+  console.log('   >> Количество предложений: ', tender.ProposalsCount);
   if (tender.BestProposal)
-    console.log('  >> Лучшее предложение: ', tender.BestProposal.Bet);
-
+    console.log('   >> Лучшее предложение: ', tender.BestProposal.Bet);
 }
 
 // обработка результатов запроса

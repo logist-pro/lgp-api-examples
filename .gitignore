@@ -68,3 +68,4 @@ typings/
 *-lock.*
 bin
 obj
+/lgp-api-python/__pycache__

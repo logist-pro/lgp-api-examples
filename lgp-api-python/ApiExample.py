@@ -16,7 +16,7 @@ PASSWORD = "..."
 def handleErrors(response):
   if response.status_code != 200:
     message = response.content.decode('utf-8')
-    print('  >> [Error] HttpCode={}:\n{}'.format(response.status_code, message))
+    print('   >> [Error] HttpCode={}:\n{}'.format(response.status_code, message))
     return response.status_code
 
 
@@ -28,44 +28,50 @@ headers = {
 }
 
 
-# тестирование доступа (запрос не требует авторизации, только ключ API в заголовках запроса)
+# -----
+# 1. тестирование доступа (запрос не требует авторизации, только ключ API в заголовках запроса)
+# -----
 url = API_BASE_URL+'test/ping'
-print('Проверка доступа к API: {}'.format(url))
+print('1. Проверка доступа к API: {}'.format(url))
 # GET запрос на сервер
 response = requests.get(url, headers=headers)
 # проверка ответа сервера
 if handleErrors(response):
-  print('  >> API не доступен')
+  print('   >> API не доступен')
   # выход с отрицательным кодом ошибки
   sys.exit(-1)
-else: print('  >> есть доступ')
+else: print('   >> есть доступ')
 
 
-# авторизация в системе заданным пользователем
+# -----
+# 2. авторизация в системе заданным пользователем
+# -----
 url = API_BASE_URL+'account/login'
-print('Авторизация: {}'.format(url))
+print('2. Авторизация: {}'.format(url))
 # передача параметров в URL
 url = url+'?login={}&password={}'.format(LOGIN, PASSWORD)
 # POST запрос с пустым телом
 response = requests.post(url, headers=headers)
 if handleErrors(response): sys.exit(-2)
 else: 
-  print('  >> прошла успешно')
+  print('   >> прошла успешно')
   # поиск Set-Cookie заголовка ответа
   cookie = response.headers.get('Set-Cookie')
   if cookie is None:
-    print('  >> [Error] cookie не установлена')
+    print('   >> [Error] cookie не установлена')
     sys.exit(-3)
   # значения первой возвращенной куки (.AspNet.ApplicationCookie)
   # добавляется в заголовки всех последующих HTTP запросов
   headers['Cookie'] = cookie.split(';')[0]
 
 
-# перед созданием нового запроса, необходимо определить значения некоторых обязательных параметров
-# (в частности, идентификаторов компании заказчика и ответственного за заказ лица)
-# если эти параметры неизвестны, то можно запросить актуальные справочники с сервера
+# -----
+# 3. перед созданием нового запроса, необходимо определить значения некоторых обязательных параметров
+#    (в частности, идентификаторов компании заказчика и ответственного за заказ лица)
+#    если эти параметры неизвестны, то можно запросить актуальные справочники с сервера
+# -----
 url = API_BASE_URL+'tender/create'
-print('Получение справочников для создания запроса: {}'.format(url))
+print('3. Получение справочников для создания запроса: {}'.format(url))
 response = requests.get(url, headers=headers)
 if handleErrors(response): sys.exit(-4)
 else:
@@ -75,11 +81,14 @@ else:
   coprorateId = dicts['Corporates'][0]['Id']
   contactId = dicts['Corporates'][0]['ContactPersons'][0]['Id']
   if coprorateId is None or contactId is None:
-    print('  >> [Error] не найдены необходимые элементы справочника.')
+    print('   >> [Error] не найдены необходимые элементы справочника.')
     sys.exit(-5)
 
 
-print('Создание запроса: {}'.format(url))
+# -----
+# 4. Создание запроса
+# -----
+print('4. Создание запроса: {}'.format(url))
 # время создания заказа
 now = datetime.datetime.now()
 # дата исполнения заказа (текущая дата +7 дней, 08:00)
@@ -138,20 +147,22 @@ if handleErrors(response): sys.exit(-6)
 else:
   # получение идентификатора новосозданного запроса
   tenderId = response.content.decode('utf-8').strip('"')
-  print('  >> Создан запрос Id={}'.format(tenderId))
+  print('   >> Создан запрос Id={}'.format(tenderId))
 
 
-# для проверки статуса нового запроса, запрашиваем полные данные по идентификатору
+# -----
+# 5. для проверки статуса нового запроса, запрашиваем полные данные по идентификатору
+# -----
 url = API_BASE_URL+'tender/'+tenderId
-print('Проверка статуса запроса: {}'.format(url))
+print('5. Проверка статуса запроса: {}'.format(url))
 response = requests.get(url, headers=headers)
 if handleErrors(response): sys.exit(-7)
 else:
   tender = json.loads(response.content.decode('utf-8'))
-  print('  >> Номер: {}'.format(tender['Number']))
-  print('  >> Статус: {} ({})'.format(tender['StatusTitle'], tender['Status']))
-  print('  >> Время последнего изменения статуса: {} ({})'.format(tender['ActualDate'], tender['ActualDateTitle']))
-  print('  >> Длина маршрута: {}'.format(tender['RouteLenght']))
-  print('  >> Количество предложений: {}'.format(tender['ProposalsCount']))
+  print('   >> Номер: {}'.format(tender['Number']))
+  print('   >> Статус: {} ({})'.format(tender['StatusTitle'], tender['Status']))
+  print('   >> Время последнего изменения статуса: {} ({})'.format(tender['ActualDate'], tender['ActualDateTitle']))
+  print('   >> Длина маршрута: {}'.format(tender['RouteLenght']))
+  print('   >> Количество предложений: {}'.format(tender['ProposalsCount']))
   if tender['BestProposal'] is not None:
-    print('  >> Лучшее предложение: {}'.format(tender['BestProposal']['Bet']))
+    print('   >> Лучшее предложение: {}'.format(tender['BestProposal']['Bet']))
