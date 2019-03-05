@@ -7,3 +7,4 @@
 - [Python 3](lgp-api-python)
 - [JavaScript (Node.js)](lgp-api-nodejs)
 - [C# (.Net Core 2.1)](lgp-api-csharp)
+- [PowerShell 3](lgp-api-powershell)
