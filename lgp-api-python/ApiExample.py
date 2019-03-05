@@ -81,7 +81,7 @@ else:
   coprorateId = dicts['Corporates'][0]['Id']
   contactId = dicts['Corporates'][0]['ContactPersons'][0]['Id']
   if coprorateId is None or contactId is None:
-    print('   >> [Error] не найдены необходимые элементы справочника.')
+    print('   >> [Error] не найдены необходимые элементы справочника')
     sys.exit(-5)
 
 
