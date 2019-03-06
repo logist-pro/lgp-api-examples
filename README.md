@@ -8,3 +8,4 @@
 - [JavaScript (Node.js)](lgp-api-nodejs)
 - [C# (.Net Core 2.1)](lgp-api-csharp)
 - [PowerShell 3](lgp-api-powershell)
+- [Console: cURL, Wget (Windows CMD)](lgp-api-win-cmd)
