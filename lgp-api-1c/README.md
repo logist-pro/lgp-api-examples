@@ -2,8 +2,6 @@
 
 Полная документация API https://wiki.logistpro.su/display/LKB/LogistPro+API
 
-В качестве платформы для запуска, используется сервер [Node.js](https://nodejs.org/en/download/).
-
 ## Запуск примера
 Для запуска примера, необходимо:
 1. платформа не ниже версии 8.3
