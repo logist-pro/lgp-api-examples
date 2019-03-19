@@ -69,3 +69,4 @@ typings/
 bin
 obj
 /lgp-api-python/__pycache__
+/tests
