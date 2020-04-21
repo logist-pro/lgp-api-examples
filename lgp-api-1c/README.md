@@ -10,7 +10,6 @@
 	```
 	// базовые настройки доступа
 	API_BASE_HOST = "https://...";
-	API_BASE_URL = API_BASE_HOST+"/api/v1/";
 	```
 	- API ключ личного кабинета компании (запросить ключ можно обратившись в [Службу поддержки](https://jira.logistpro.su/servicedesk/customer/portal/4) или написав заявку по адресу support@logistpro.su)
 	```
