@@ -38,3 +38,7 @@
 	- Время последнего изменения статуса
 	- Количество предложений
 	- Текущее лучшее предложение
+
+## Полезные ссылки
+- [Работа с http-запросами (get и post) в языке 1С 8.3, 8.2 (в примерах)](https://helpme1c.ru/rabota-s-http-zaprosami-get-i-post-v-yazyke-1s-8-3-8-2-v-primerax#ref_c_0)
+- [Средства работы с JSON](https://wonderland.v8.1c.ru/blog/sredstva-raboty-s-json/)
