@@ -34,8 +34,7 @@ REM 2. авторизация в системе заданным пользов�
 REM -----
 SET URL="%API_BASE_URL%/account/login"
 ECHO 2. Авторизация: %URL%
-SET URL="%URL%?login=%LOGIN%&password=%PASSWORD%"
-%CURL% -X POST --data "" %HEADER% %SAVE_COOKIE% %URL%
+%CURL% -X POST --data "{Login:^"%LOGIN%^",Password:^"%PASSWORD%^"}" %HEADER% %SAVE_COOKIE% %URL%
 ECHO    прошла успешно
 
 

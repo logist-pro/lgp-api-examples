@@ -43,10 +43,13 @@ async function main() {
   // -----
   url = API_BASE_URL+'account/login';
   console.log('2. Авторизация: ', url);
-  // передача параметров в URL
-  url = url+`?login=${LOGIN}&password=${PASSWORD}`;
-  // POST запрос с пустым телом
-  response = await requestPost(url);
+  // передача параметров в теле запроса
+  const login = {
+    Login: LOGIN,
+    Password: PASSWORD
+  }
+  // POST запрос
+  response = await requestPost(url, login);
   if (!response) return;
   console.log('   >> прошла успешно');
   // поиск Set-Cookie заголовка ответа
@@ -91,48 +94,56 @@ async function main() {
   // объект для передачи в запросе в формате JSON
   let tender = {
     // время создания заказа (может быть любая прошедшая дата)
-    "OrderDate": now.toISOString(),
+    OrderDate: now.toISOString(),
     // дата исполнения заказа
-    "StartDate": start.toISOString(),
-    "Customer": {
-      "CompanyId": corporateId,
-      "ContactId": contactId
+    StartDate: start.toISOString(),
+    Customer: {
+      CompanyId: corporateId,
+      ContactId: contactId
     },
-    "Cargo": "Важный груз",
-    "CargoWeight": 10,
-    "CargoVolume": 10,
-    "CargoDangerClass": 0,
-    // сборный груз (не требует детального описания упаковки)
-    "PackageType": "Joint",
-    "RoutePoints": [
+    Cargo: "Важный груз",
+    CargoWeight: 10,
+    CargoVolume: 10,
+    CargoDangerClass: 0,
+    // детальное описание упаковки
+    PackageDetails = [{
+      Type: "Pallets",
+      Number: 12
+    }],
+    RoutePoints: [
       {
         // точка погрузки
-        "Type": "Loading",
-        "Address": "Москва, Красная площадь",
+        Type: "Loading",
+        Address: "Москва, Красная площадь",
         // время прибытия = дата исполнения заказа
-        "ArrivalTime": start.toISOString(),
+        ArrivalTime: start.toISOString(),
         // время отбытия +1 час
-        "LeaveTime": new Date((new Date(start)).setHours(9)).toISOString(),
+        LeaveTime: new Date((new Date(start)).setHours(9)).toISOString(),
       },
       {
         // точка выгрузки
-        "Type": "Unloading",
-        "Address": "Санкт-Петербург, Дворцовая площадь",
+        Type: "Unloading",
+        Address: "Санкт-Петербург, Дворцовая площадь",
         // если не указывть расстояние до точки маршрута, то система попытается самостоятельно построить маршрут и определить расстояние
         // "Distance": 750,
-        "ArrivalTime": new Date((new Date(start)).setHours(19)).toISOString(),
-        "LeaveTime": new Date((new Date(start)).setHours(20)).toISOString()
+        ArrivalTime: new Date((new Date(start)).setHours(19)).toISOString(),
+        LeaveTime: new Date((new Date(start)).setHours(20)).toISOString()
       }
     ],
-    "Tender": {
+    Tender: {
       // запуск торгов сразу по созданию заказа
-      "StartDate": now.toISOString(),
+      StartDate: now.toISOString(),
       // торги должны закончиться минимум за 30 минут до исполнения заказа
-      "EndDate": new Date((new Date(start)).setHours(7)).toISOString(),
-      "InitCost": 50000,
+      EndDate: new Date((new Date(start)).setHours(7)).toISOString(),
+      InitCost: 50000,
       // торги с автоматическим подбором минимального шага
-      "MinStepReq": "Auto",
-      "VatReqs": "None",
+      MinStepReq: "Auto",
+      VatReqs: "None",
+    },
+    // требования к транспорту
+    TransportRequirements: {
+        TransportType: "Auto",
+        BodyType: "Tent"
     }
   };
   response = await requestPost(url, tender);
@@ -156,7 +167,6 @@ async function main() {
   tender = await response.json();
   console.log('   >> Номер: ', tender.Number);
   console.log(`   >> Статус: ${tender.StatusTitle} (${tender.Status})`);
-  console.log(`   >> Время последнего изменения статуса: ${tender.ActualDate} (${tender.ActualDateTitle})`);
   console.log('   >> Длина маршрута: ', tender.RouteLenght);
   console.log('   >> Количество предложений: ', tender.ProposalsCount);
   if (tender.BestProposal)

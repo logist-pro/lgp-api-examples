@@ -35,11 +35,17 @@ Write-Host "   >> есть доступ"
 # -----
 $url = "$($API_BASE_URL)account/login"
 Write-Host "2. Авторизация:" $url
-# передача параметров в URL
-$url = "$($url)?login=$($LOGIN)&password=$($PASSWORD)"
-# POST запрос с пустым телом 
+# передача параметров в теле запроса
+$login = @{
+    Login = $LOGIN
+    Password = $PASSWORD
+}
+# конвертация в JSON
+$body = [System.Text.Encoding]::UTF8.GetBytes((ConvertTo-Json $login))
+# POST запрос с json в теле
 # (используем Invoke-WebRequest, чтобы получить заголовки ответа)
-$response = Invoke-WebRequest -Uri $url -Method Post -Body "" -Headers $headers
+$response = Invoke-WebRequest -Uri $url -Method Post -Body $body -Headers $headers
+
 Write-Host "   >> прошла успешно"
 # поиск Set-Cookie заголовка ответа
 $appCookie = $response.Headers["Set-Cookie"]
@@ -95,8 +101,12 @@ $tender = @{
     CargoWeight = 10
     CargoVolume = 10
     CargoDangerClass = 0
-    # сборный груз (не требует детального описания упаковки)
-    PackageType = "Joint"
+    # детальное описание упаковки
+    PackageDetails =
+        @{
+            Type = "Pallets",
+            Number = 12
+        }
     RoutePoints = 
         @{
             # точка погрузки
@@ -127,6 +137,11 @@ $tender = @{
         # торги с автоматическим подбором минимального шага
         MinStepReq = "Auto"
         VatReqs = "None"
+    }
+    # требования к транспорту
+    TransportRequirements = @{
+        TransportType = "Auto",
+        BodyType = "Tent"
     }
 }
 # конвертация в JSON

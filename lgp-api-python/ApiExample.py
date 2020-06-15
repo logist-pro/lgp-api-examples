@@ -48,10 +48,13 @@ else: print('   >> есть доступ')
 # -----
 url = API_BASE_URL+'account/login'
 print('2. Авторизация: {}'.format(url))
-# передача параметров в URL
-url = url+'?login={}&password={}'.format(LOGIN, PASSWORD)
-# POST запрос с пустым телом
-response = requests.post(url, headers=headers)
+# передача параметров в теле запроса
+login = {
+  Login: LOGIN,
+  Password: PASSWORD
+}
+# POST запрос
+response = requests.post(url, headers=headers, json=login)
 if handleErrors(response): sys.exit(-2)
 else: 
   print('   >> прошла успешно')
@@ -109,8 +112,13 @@ tender = {
   "CargoWeight": 10,
   "CargoVolume": 10,
   "CargoDangerClass": 0,
-  # сборный груз (не требует детального описания упаковки)
-  "PackageType": "Joint",
+  # детальное описание упаковки
+  "PackageDetails": [
+    {
+      "Type": "Pallets",
+      "Number": 12
+    }
+  ],
   "RoutePoints": [
     {
       # точка погрузки
@@ -140,6 +148,11 @@ tender = {
     # торги с автоматическим подбором минимального шага
     "MinStepReq": "Auto",
     "VatReqs": "None",
+  }
+  # требования к транспорту
+  "TransportRequirements": {
+    "TransportType": "Auto",
+    "BodyType": "Tent"
   }
 }
 response = requests.post(url, headers=headers, json=tender)
